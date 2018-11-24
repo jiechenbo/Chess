@@ -1,0 +1,2 @@
+TO DO:
+	refactor validMove into validMove and doMove such that KingCheck works well
