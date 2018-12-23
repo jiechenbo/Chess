@@ -112,25 +112,27 @@ public:
 
 	bool makeMove(int spriteX, int spriteY, int newX, int newY, int spriteValue, bool whiteMove, bool doMove);
 
-	bool kingCheckMoves(bool whiteMove, int** gameBoard);
+	bool kingCheckMoves(bool whiteMove, int gameBoard[8][8]);
 
 	void getMoveList(bool whiteMove, int posX, int posY, int moveList[2][64]);
 
-	bool checkStale(bool whiteMove, int** gameBoard);
+	bool checkStale(bool whiteMove, int gameBoard[8][8]);
 
-	bool checkWin(bool whiteMove, int** gameBoard);
+	bool checkWin(bool whiteMove, int gameBoard[8][8]);
 
 	int scaleValue(int value);
 
-	int** getBoard();
+	bool checkKingMove(bool whiteMove, int posX, int posY, int newX, int newY);
+
+	int (*getGameBoard())[8];
+
 
 private:
 
-	bool kingMoves(int spriteX, int spriteY, int newX, int newY, int** gameBoard, bool whiteMove);
+	bool kingMoves(int spriteX, int spriteY, int newX, int newY, int gameBoard[8][8], bool whiteMove);
 
-	bool checkKingMove(bool whiteMove, int posX, int posY, int newX, int newY);
 
-	int **gameBoard;
+	int gameBoard[8][8];
 
 	bool gameMoved[8][8] = { false };
 

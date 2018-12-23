@@ -1,18 +1,14 @@
 #include "Engine.h"
 
-void initRow(int **gameBoard, int startRow, int isBlack); 
-bool pawnMoves(int spriteX, int spriteY, int newX, int newY, int** gameBoard, bool whiteMove);
-bool rookMoves(int spriteX, int spriteY, int** gameBoard, bool whiteMove, int newX, int newY);
-bool bishopMoves(int spriteX, int spriteY, int newX, int newY, int** gameBoard, bool whiteMove);
-bool horseMoves(int spriteX, int spriteY, int newX, int newY, int** gameBoard, bool whiteMove);
-bool queenMoves(int spriteX, int spriteY, int newX, int newY, int** gameBoard, bool whiteMove);
+void initRow(int gameBoard[8][8], int startRow, int isBlack); 
+bool pawnMoves(int spriteX, int spriteY, int newX, int newY, int gameBoard[8][8], bool whiteMove);
+bool rookMoves(int spriteX, int spriteY, int gameBoard[8][8], bool whiteMove, int newX, int newY);
+bool bishopMoves(int spriteX, int spriteY, int newX, int newY, int gameBoard[8][8], bool whiteMove);
+bool horseMoves(int spriteX, int spriteY, int newX, int newY, int gameBoard[8][8], bool whiteMove);
+bool queenMoves(int spriteX, int spriteY, int newX, int newY, int gameBoard[8][8], bool whiteMove);
 
 Board::Board()
 {
-	gameBoard = (int **)malloc(BOARD_SIZE * sizeof(int *));
-	for (int i = 0; i < BOARD_SIZE; i++) {
-		gameBoard[i] = (int *)malloc(BOARD_SIZE * sizeof(int));
-	}
 	for (int i = 0; i < BOARD_SIZE; i++) {
 		for (int j = 0; j < BOARD_SIZE; j++) {
 			gameBoard[i][j] = -1;
@@ -83,7 +79,7 @@ int Board::scaleValue(int value) {
 
 }
 
-void initRow(int **gameBoard, int startRow, int isBlack) {
+void initRow(int gameBoard[8][8], int startRow, int isBlack) {
 	int startValue = isBlack * 6 + 4;
 	for (int i = 0; i < 5; i++) {
 		gameBoard[startRow][i] = startValue;
@@ -99,29 +95,18 @@ void initRow(int **gameBoard, int startRow, int isBlack) {
 }
 
 bool Board::makeMove(int spriteX, int spriteY, int newX, int newY, int spriteValue, bool whiteMove, bool doMove) {
-	int scaleWidth = gBoard.getWidth() / BOARD_SIZE;
-	int scaleHeight = gBoard.getHeight() / BOARD_SIZE;
-
-	int scaledSpriteY = spriteY / scaleHeight;
-	int scaledSpriteX = spriteX / scaleWidth;
-
-	int scaledNewX = newX / scaleWidth;
-	int scaledNewY = newY / scaleHeight;
-	printf("spriteX: %d spriteY:%d\n", scaledSpriteX, scaledSpriteY);
+	printf("spriteX: %d spriteY:%d\n", spriteX, spriteY);
 
 	bool validMoveCheck = false;
-	validMoveCheck = validMove(scaledSpriteX, scaledSpriteY, scaledNewX, scaledNewY, spriteValue, whiteMove, doMove, gameBoard);
-	int** newGameBoard = (int **)malloc(BOARD_SIZE * sizeof(int *));
-	for (int i = 0; i < BOARD_SIZE; i++) {
-		newGameBoard[i] = (int *)malloc(BOARD_SIZE * sizeof(int));
-	}
+	validMoveCheck = validMove(spriteX, spriteY, newX, newY, spriteValue, whiteMove, doMove, gameBoard);
+	int newGameBoard[8][8] = { { -1 } };
 	for (int i = 0; i < BOARD_SIZE; i++) {
 		for (int j = 0; j < BOARD_SIZE; j++) {
 			newGameBoard[i][j] = gameBoard[i][j];
 		}
 	}
-	newGameBoard[scaledNewY][scaledNewX] = newGameBoard[scaledSpriteY][scaledSpriteX];
-	newGameBoard[scaledSpriteY][scaledSpriteX] = -1;
+	newGameBoard[newY][newX] = newGameBoard[spriteY][spriteX];
+	newGameBoard[spriteY][spriteX] = -1;
 	printf("Valid move? %d\n", validMoveCheck == true);
 	if (doMove) {
 		bool check = kingCheckMoves(whiteMove, newGameBoard);
@@ -130,37 +115,37 @@ bool Board::makeMove(int spriteX, int spriteY, int newX, int newY, int spriteVal
 			int king = whiteMove == true ? WHITE_KING : BLACK_KING;
 
 
-			int distanceX = abs(scaledNewX - scaledSpriteX);
-			int distanceY = abs(scaledNewY - scaledSpriteY);
+			int distanceX = abs(newX - spriteX);
+			int distanceY = abs(newY - spriteY);
 
-			if (gameBoard[scaledSpriteY][scaledSpriteX] == king && distanceX == 2 && distanceY == 0 && kingCheckMoves(whiteMove, gameBoard)) return false;
-			if (gameMoved[scaledSpriteY][scaledSpriteX] == false && initGameBoard[scaledSpriteY][scaledSpriteX] == gameBoard[scaledSpriteY][scaledSpriteX]) {
-				gameMoved[scaledSpriteY][scaledSpriteX] = true;
+			if (gameBoard[spriteY][spriteX] == king && distanceX == 2 && distanceY == 0 && kingCheckMoves(whiteMove, gameBoard)) return false;
+			if (gameMoved[spriteY][spriteX] == false && initGameBoard[spriteY][spriteX] == gameBoard[spriteY][spriteX]) {
+				gameMoved[spriteY][spriteX] = true;
 			}
 
-			if (gameBoard[scaledSpriteY][scaledSpriteX] == king) {
-				printf("\nCASTLING....... %d %d %d %d\n", distanceX, distanceY, scaledNewX, scaledSpriteX);
+			if (gameBoard[spriteY][spriteX] == king) {
+				printf("\nCASTLING....... %d %d %d %d\n", distanceX, distanceY, newX, spriteX);
 
 				if (distanceX == 2 && distanceY == 0) {
 					
 					if (newX > spriteX) {
-						gameBoard[scaledSpriteY][scaledNewX - 1] = gameBoard[scaledSpriteY][7];
-						gameBoard[scaledSpriteY][7] = -1;
+						gameBoard[spriteY][newX - 1] = gameBoard[spriteY][7];
+						gameBoard[spriteY][7] = -1;
 					}
 					else {
-						gameBoard[scaledSpriteY][scaledNewX + 1] = gameBoard[scaledSpriteY][0];
-						gameBoard[scaledSpriteY][0] = -1;
+						gameBoard[spriteY][newX + 1] = gameBoard[spriteY][0];
+						gameBoard[spriteY][0] = -1;
 					}
 				}
 			} 
 
-				gameBoard[scaledNewY][scaledNewX] = gameBoard[scaledSpriteY][scaledSpriteX];
-				gameBoard[scaledSpriteY][scaledSpriteX] = -1;
+				gameBoard[newY][newX] = gameBoard[spriteY][spriteX];
+				gameBoard[spriteY][spriteX] = -1;
 			
-			printf("\nCASTLING....... %d\n", gameBoard[scaledNewY][scaledNewX]);
+			printf("\nCASTLING....... %d\n", gameBoard[newY][newX]);
 		
-			if ((gameBoard[scaledNewY][scaledNewX] == BLACK_PAWN && scaledNewY == BOARD_SIZE - 1) || (gameBoard[scaledNewY][scaledNewX] == WHITE_PAWN && scaledNewY == 0)) {
-				gameBoard[scaledNewY][scaledNewX] = whiteMove ? WHITE_QUEEN : BLACK_QUEEN;
+			if ((gameBoard[newY][newX] == BLACK_PAWN && newY == BOARD_SIZE - 1) || (gameBoard[newY][newX] == WHITE_PAWN && newY == 0)) {
+				gameBoard[newY][newX] = whiteMove ? WHITE_QUEEN : BLACK_QUEEN;
 			}
 			//printBoard();
 			if (kingCheckMoves(!whiteMove, gameBoard)) {
@@ -192,7 +177,7 @@ bool Board::makeMove(int spriteX, int spriteY, int newX, int newY, int spriteVal
 	printBoard();
 	return false;
 }
-bool Board::checkStale(bool whiteMove, int** gameBoard) {
+bool Board::checkStale(bool whiteMove, int gameBoard[8][8]) {
 	printf("\n--------------CHECKING STALE--------------\n");
 
 	int lowerLimit = whiteMove == true ? WHITE_KING : BLACK_KING;
@@ -223,7 +208,7 @@ bool Board::checkStale(bool whiteMove, int** gameBoard) {
 
 }
 
-bool Board::checkWin(bool whiteMove, int** gameBoard) {
+bool Board::checkWin(bool whiteMove, int gameBoard[8][8]) {
 	printf("\n--------------CHECKING WIN--------------\n");
 	
 	int lowerLimit = whiteMove == true ? WHITE_KING : BLACK_KING;
@@ -265,10 +250,7 @@ bool Board::checkWin(bool whiteMove, int** gameBoard) {
 }
 
 bool Board::checkKingMove(bool whiteMove, int posX, int posY, int newX, int newY) {
-	int** newGameBoard = (int **)malloc(BOARD_SIZE * sizeof(int *));
-	for (int i = 0; i < BOARD_SIZE; i++) {
-		newGameBoard[i] = (int *)malloc(BOARD_SIZE * sizeof(int));
-	}
+	int newGameBoard[8][8] = { { -1 } };
 	for (int i = 0; i < BOARD_SIZE; i++) {
 		for (int j = 0; j < BOARD_SIZE; j++) {
 			newGameBoard[i][j] = gameBoard[i][j];
@@ -280,7 +262,7 @@ bool Board::checkKingMove(bool whiteMove, int posX, int posY, int newX, int newY
 	return kingCheckMoves(whiteMove, newGameBoard);
 }
 
-bool Board::validMove(int spriteX, int spriteY, int newX, int newY, int spriteValue, bool whiteMove, bool doMove, int** gameBoard) {
+bool Board::validMove(int spriteX, int spriteY, int newX, int newY, int spriteValue, bool whiteMove, bool doMove, int gameBoard[8][8]) {
 	int lowerLimit = whiteMove == true ? BLACK_KING : WHITE_KING;
 	int higherLimit = whiteMove == true ? BLACK_PAWN : WHITE_PAWN;
 
@@ -332,7 +314,7 @@ printf("spriteX: %d spriteY:%d newX:%d newY: %d\n", spriteX, spriteY, newX, newY
 	return validMove;
 }
 
-bool Board::kingCheckMoves(bool whiteMove, int** gameBoard) {
+bool Board::kingCheckMoves(bool whiteMove, int gameBoard[8][8]) {
 	printf("--------------CHECKING CHECK--------------\n");
 	
 	int lowerLimit = whiteMove == true ? BLACK_KING : WHITE_KING;
@@ -367,7 +349,7 @@ bool Board::kingCheckMoves(bool whiteMove, int** gameBoard) {
 	return false;
 }
 	
-bool queenMoves(int spriteX, int spriteY, int newX, int newY, int** gameBoard, bool whiteMove) {
+bool queenMoves(int spriteX, int spriteY, int newX, int newY, int gameBoard[8][8], bool whiteMove) {
 
 	if (bishopMoves(spriteX, spriteY, newX, newY, gameBoard, whiteMove) || rookMoves(spriteX, spriteY, gameBoard, whiteMove, newX, newY)) {
 		return true;
@@ -377,7 +359,7 @@ bool queenMoves(int spriteX, int spriteY, int newX, int newY, int** gameBoard, b
 	}
 }
 
-bool Board::kingMoves(int spriteX, int spriteY, int newX, int newY, int** gameBoard, bool whiteMove) {
+bool Board::kingMoves(int spriteX, int spriteY, int newX, int newY, int gameBoard[8][8], bool whiteMove) {
 	int distanceX = abs(newX - spriteX);
 	int distanceY = abs(newY - spriteY);
 
@@ -422,7 +404,7 @@ bool Board::kingMoves(int spriteX, int spriteY, int newX, int newY, int** gameBo
 	 return false;
 }
 
-bool bishopMoves(int spriteX, int spriteY, int newX, int newY, int** gameBoard, bool whiteMove) {
+bool bishopMoves(int spriteX, int spriteY, int newX, int newY, int gameBoard[8][8], bool whiteMove) {
 	int distanceX = abs(newX - spriteX);
 	int distanceY = abs(newY - spriteY);
 	//printf("distanceX %d distanceY %d %d %d", spriteX, spriteY, newX, newY);
@@ -464,7 +446,7 @@ bool bishopMoves(int spriteX, int spriteY, int newX, int newY, int** gameBoard, 
 	return false;
 }
 
-bool horseMoves(int spriteX, int spriteY, int newX, int newY, int** gameBoard, bool whiteMove) {
+bool horseMoves(int spriteX, int spriteY, int newX, int newY, int gameBoard[8][8], bool whiteMove) {
 	int distanceX = abs(newX - spriteX);
 	int distanceY = abs(newY - spriteY);
 	//printf("hihihihihi %d %d", distanceX, distanceY);
@@ -479,7 +461,7 @@ bool horseMoves(int spriteX, int spriteY, int newX, int newY, int** gameBoard, b
 	return false;
 }
 
-bool pawnMoves(int spriteX, int spriteY, int newX, int newY, int** gameBoard, bool whiteMove) {
+bool pawnMoves(int spriteX, int spriteY, int newX, int newY, int gameBoard[8][8], bool whiteMove) {
 	bool haveMoved = true;
 	if (whiteMove && spriteY == 6) {
 		haveMoved = false;
@@ -527,7 +509,7 @@ bool pawnMoves(int spriteX, int spriteY, int newX, int newY, int** gameBoard, bo
 	return false;
 }
 
-bool rookMoves(int spriteX, int spriteY, int** gameBoard, bool whiteMove, int newX, int newY) {
+bool rookMoves(int spriteX, int spriteY, int gameBoard[8][8], bool whiteMove, int newX, int newY) {
 	int distanceX = abs(newX - spriteX);
 	int distanceY = abs(newY - spriteY);
 
@@ -590,6 +572,9 @@ void Board::printBoard() {
 	}
 }
 
+int	(*Board::getGameBoard())[8] {
+	return gameBoard;
+}
 
 void Board::getMoveList(bool whiteMove, int posX, int posY, int moveList[2][64]) {
 	int i = 0;
@@ -849,4 +834,8 @@ void Board::getMoveList(bool whiteMove, int posX, int posY, int moveList[2][64])
 		}
 		default: printf("Error spriteValue is wrong");
 		}
+	}
+
+	void getValidMoves() {
+
 	}

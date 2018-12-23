@@ -75,24 +75,37 @@ int main(int argc, char* args[])
 	while (!quit) {
 		std::chrono::time_point<std::chrono::steady_clock> y = std::chrono::high_resolution_clock::now();
 		while (SDL_PollEvent(&e) != 0) {
+			
 			if (e.type == SDL_QUIT) {
 				quit = true;
+			} else if (whiteMove == false) {
+				makeBestMove(&b, whiteMove);
+
+				whiteMove = whiteMove == true ? false : true;
+
 			} else if (e.type == SDL_MOUSEBUTTONDOWN) {
+
 				printf("Mousing down");
-				if (isInBoundingRegion(e.button.x, e.button.y)) {
+			if (isInBoundingRegion(e.button.x, e.button.y)) {
 					
 					if (spriteValue == -1 && b.getSprite(e.button.x, e.button.y) != -1) {
 						spriteValue = b.getSprite(e.button.x, e.button.y);
 
 						oldX = e.button.x;
 						oldY = e.button.y;
-					} else if (spriteValue != -1 && b.makeMove(oldX, oldY, e.button.x, e.button.y, spriteValue, whiteMove, true) == true) {
-						
-						spriteValue = -1;
-						oldX = 0;
-						oldY = 0;
-						firstTime = false;
-						whiteMove = whiteMove == true ? false : true;
+					} else if (spriteValue != -1) {
+						int scaledOldX = b.scaleValue(oldX);
+						int scaledOldY = b.scaleValue(oldY);
+
+						int scaledFinalX = b.scaleValue(e.button.x);
+						int scaledFinalY = b.scaleValue(e.button.y);
+						if (b.makeMove(scaledOldX, scaledOldY, scaledFinalX, scaledFinalY, spriteValue, whiteMove, true) == true) {
+							spriteValue = -1;
+							oldX = 0;
+							oldY = 0;
+							firstTime = false;
+							whiteMove = whiteMove == true ? false : true;
+						}
 					} else {
 						spriteValue = -1;
 						oldX = 0;
