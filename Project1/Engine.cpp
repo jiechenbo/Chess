@@ -11,9 +11,9 @@ textureTable[] = {
 
 
 draw(TEX_PIECES, ;...)*/
-
+#define _CRT_SECURE_NO_DEPRECATE
 #include "Engine.h"
-
+#include "AI.h"
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 1000;
 const int SPRITES_TOTAL = 12;
@@ -44,7 +44,6 @@ LButton gButtons[TOTAL_BUTTONS];
 
 int main(int argc, char* args[])
 {
-	
 	if (!init()) {
 		printf( "Failed to initialize!\n" );
 		return -1;
@@ -87,7 +86,7 @@ int main(int argc, char* args[])
 
 						oldX = e.button.x;
 						oldY = e.button.y;
-					} else if (spriteValue != -1 && b.validMove(oldX, oldY, e.button.x, e.button.y, spriteValue, whiteMove, true) == true) {
+					} else if (spriteValue != -1 && b.makeMove(oldX, oldY, e.button.x, e.button.y, spriteValue, whiteMove, true) == true) {
 						
 						spriteValue = -1;
 						oldX = 0;

@@ -92,31 +92,49 @@ class LButton
 };
 
 class Board {
-	public:
-		//Initializes internal variables
-		Board();
-		//Board textures
-		LTexture gBoard;
+public:
+	//Initializes internal variables
+	Board();
+	//Board textures
+	LTexture gBoard;
 
-		void initBoard();
-		//Shows board sprite
-		void render(SDL_Rect*clip = NULL);
+	void initBoard();
+	//Shows board sprite
+	void render(SDL_Rect*clip = NULL);
 
-		void renderBoard(SDL_Rect sprites[]);
+	void renderBoard(SDL_Rect sprites[]);
 
-		int getSprite(int x, int y);
+	int getSprite(int x, int y);
 
-		void printBoard();
+	void printBoard();
 
-		bool validMove(int spriteX, int spriteY, int newX, int newY, int spriteValue, bool whiteMove, bool doMove);
-		
-		bool kingCheckMoves(bool whiteMove);
+	bool validMove(int spriteX, int spriteY, int newX, int newY, int spriteValue, bool whiteMove, bool doMove, int gameBoard[8][8]);
 
-		int scaleValue(int value);
-	private:
-		int gameBoard[8][8];
+	bool makeMove(int spriteX, int spriteY, int newX, int newY, int spriteValue, bool whiteMove, bool doMove);
 
+	bool kingCheckMoves(bool whiteMove, int** gameBoard);
 
+	void getMoveList(bool whiteMove, int posX, int posY, int moveList[2][64]);
+
+	bool checkStale(bool whiteMove, int** gameBoard);
+
+	bool checkWin(bool whiteMove, int** gameBoard);
+
+	int scaleValue(int value);
+
+	int** getBoard();
+
+private:
+
+	bool kingMoves(int spriteX, int spriteY, int newX, int newY, int** gameBoard, bool whiteMove);
+
+	bool checkKingMove(bool whiteMove, int posX, int posY, int newX, int newY);
+
+	int **gameBoard;
+
+	bool gameMoved[8][8] = { false };
+
+	int initGameBoard[8][8];
 }; 
 
 bool init();
