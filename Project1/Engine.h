@@ -6,6 +6,12 @@
 #include <memory>
 #include <iostream>
 
+#include <vector>
+#include <array>
+
+
+using namespace std;
+
 //Screen dimension constants
 extern const int SCREEN_WIDTH;
 extern const int SCREEN_HEIGHT;
@@ -108,13 +114,15 @@ public:
 
 	void printBoard();
 
-	bool validMove(int spriteX, int spriteY, int newX, int newY, int spriteValue, bool whiteMove, bool doMove, int gameBoard[8][8]);
+	bool validMove(int spriteX, int spriteY, int newX, int newY, bool whiteMove, bool doMove, int gameBoard[8][8]);
 
-	bool makeMove(int spriteX, int spriteY, int newX, int newY, int spriteValue, bool whiteMove, bool doMove);
+	void makeMove(int spriteX, int spriteY, int newX, int newY, bool whiteMove, int gameBoard[8][8], bool simulation);
+
+	bool UserMove(int spriteX, int spriteY, int newX, int newY, bool whiteMove);
 
 	bool kingCheckMoves(bool whiteMove, int gameBoard[8][8]);
 
-	void getMoveList(bool whiteMove, int posX, int posY, int moveList[2][64]);
+	void getMoveList(bool whiteMove, int posX, int posY, int moveList[2][64], int gameBoard[8][8]);
 
 	bool checkStale(bool whiteMove, int gameBoard[8][8]);
 
@@ -122,11 +130,11 @@ public:
 
 	int scaleValue(int value);
 
-	bool checkKingMove(bool whiteMove, int posX, int posY, int newX, int newY);
+	bool checkKingMove(bool whiteMove, int posX, int posY, int newX, int newY, int gameBoard[8][8]);
 
 	int (*getGameBoard())[8];
 
-
+	vector<array<int, 4>> Board::generateAllMovelists(bool whiteMove, int gameBoard[8][8]);
 private:
 
 	bool kingMoves(int spriteX, int spriteY, int newX, int newY, int gameBoard[8][8], bool whiteMove);

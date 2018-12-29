@@ -14,8 +14,8 @@ draw(TEX_PIECES, ;...)*/
 #define _CRT_SECURE_NO_DEPRECATE
 #include "Engine.h"
 #include "AI.h"
-const int SCREEN_WIDTH = 1000;
-const int SCREEN_HEIGHT = 1000;
+const int SCREEN_WIDTH = 700;
+const int SCREEN_HEIGHT = 700;
 const int SPRITES_TOTAL = 12;
 
 SDL_Window* gWindow = NULL;
@@ -72,6 +72,7 @@ int main(int argc, char* args[])
 	int oldY = 0;
 	bool firstTime = true;
 	bool whiteMove = true;
+	AI comp;
 	while (!quit) {
 		std::chrono::time_point<std::chrono::steady_clock> y = std::chrono::high_resolution_clock::now();
 		while (SDL_PollEvent(&e) != 0) {
@@ -79,7 +80,15 @@ int main(int argc, char* args[])
 			if (e.type == SDL_QUIT) {
 				quit = true;
 			} else if (whiteMove == false) {
-				makeBestMove(&b, whiteMove);
+				comp.makeBestMove(&b, whiteMove);
+				if (b.kingCheckMoves(!whiteMove, b.getGameBoard())) {
+					printf("WASMGFIASGMSAIGMASIGMAIGMAIGAMIGMASIGMASIGMASIGMAIGMAIGAM");
+					b.checkWin(!whiteMove, b.getGameBoard());
+				}
+				else if (b.checkStale(!whiteMove, b.getGameBoard())) {
+					printf("stale!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+					//exit(0);
+				}
 
 				whiteMove = whiteMove == true ? false : true;
 
@@ -99,12 +108,22 @@ int main(int argc, char* args[])
 
 						int scaledFinalX = b.scaleValue(e.button.x);
 						int scaledFinalY = b.scaleValue(e.button.y);
-						if (b.makeMove(scaledOldX, scaledOldY, scaledFinalX, scaledFinalY, spriteValue, whiteMove, true) == true) {
+						if (b.UserMove(scaledOldX, scaledOldY, scaledFinalX, scaledFinalY, whiteMove) == true) {
+							if (b.kingCheckMoves(!whiteMove, b.getGameBoard())) {
+								printf("WASMGFIASGMSAIGMASIGMAIGMAIGAMIGMASIGMASIGMASIGMAIGMAIGAM");
+								b.checkWin(!whiteMove, b.getGameBoard());
+							}
+							else if (b.checkStale(!whiteMove, b.getGameBoard())) {
+								printf("stale!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+								//exit(0);
+							}
+
 							spriteValue = -1;
 							oldX = 0;
 							oldY = 0;
 							firstTime = false;
 							whiteMove = whiteMove == true ? false : true;
+						
 						}
 					} else {
 						spriteValue = -1;

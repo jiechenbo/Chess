@@ -5,8 +5,11 @@
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="LButton.cpp" />
     <ClCompile Include="Board.cpp" />
+    <ClCompile Include="AI.cpp" />
+    <ClCompile Include="Piece.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h" />
+    <ClInclude Include="AI.h" />
   </ItemGroup>
 </Project>
