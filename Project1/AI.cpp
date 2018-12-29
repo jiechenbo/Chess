@@ -5,22 +5,64 @@
 #include <algorithm>    // std::max
 #include <float.h>
 
+
+void copyGamestate(int src[8][8], int dest[8][8]);
+
 void AI::makeBestMove(Board* b, bool whiteMove) {
 	int (*gameBoard)[8] = b->getGameBoard();
 	vector<array<int, 4>> allMoves = b->generateAllMovelists(whiteMove, gameBoard);
 	
 	double bestValue = -DBL_MAX;
 	int bestMove = 0;
+	int depth = 4;
 	for (int i = 0; i < allMoves.size(); i++) {
 		array<int, 4> randMove = allMoves.at(i);
 		int newGameBoard[8][8] = { {-1} };
-
-		memcpy(&newGameBoard, gameBoard, sizeof(int) * BOARD_SIZE * BOARD_SIZE);
 		
+		copyGamestate(gameBoard, newGameBoard);
 		b->makeMove(randMove.at(0), randMove.at(1), randMove.at(2), randMove.at(3), whiteMove, newGameBoard, false);
+		double boardValue;
+		int key = hash(newGameBoard);
+		//printf("%d\n", key);
+		
+		if (transpo.find(key) != transpo.end()) {
+			array<double, 2> info = transpo[key];
+			if (info.at(0) > depth) {
 
-		double boardValue = minimax(b, 1, -DBL_MAX, DBL_MAX, newGameBoard, !whiteMove);
-	//	printf("%d %d %d %d %lf %lf\n", randMove.at(1), randMove.at(0), randMove.at(3), randMove.at(2), bestValue, boardValue);
+				//printf("WORKING!!! %d\n", info.at(1));
+				bestMove = info.at(1);
+			}
+			else {
+				boardValue = minimax(b, depth - 1, -DBL_MAX, DBL_MAX, newGameBoard, !whiteMove);
+			}
+		}
+		else { 
+			boardValue = minimax(b, depth - 1, -DBL_MAX, DBL_MAX, newGameBoard, !whiteMove);
+		}
+
+		if (transpo.find(key) == transpo.end()) {
+
+			array<double, 2> info = { (double)depth, bestMove };
+
+			// printf("%lf %d\n", info.at(0), depth);
+			transpo[key] = info;
+		}
+		else {
+			array<double, 2> info = transpo.at(key);
+			//			if (depth == 2) printf("%lf %d\n", info.at(0), depth);
+
+			if (info[0] > depth) {
+				array<double, 2> info = { (double)depth, bestMove };
+				transpo[key] = info;
+			}
+		}
+		
+		if (transpo.find(key) == transpo.end()) {
+			array<double, 2> info = { (double) depth, boardValue };
+			transpo[key] = info;
+		}
+	
+		//	printf("%d %d %d %d %lf %lf\n", randMove.at(1), randMove.at(0), randMove.at(3), randMove.at(2), bestValue, boardValue);
 		if (boardValue > bestValue) {
 			
 			bestValue = boardValue;
@@ -45,11 +87,46 @@ double AI::minimax(Board* b, int depth, double alpha, double beta, int gameBoard
 			array<int, 4> randMove = allMoves.at(i);
 			int newGameBoard[8][8] = { {-1} };
 
-			memcpy(&newGameBoard, gameBoard, sizeof(int) * BOARD_SIZE * BOARD_SIZE);
+
+			copyGamestate(gameBoard, newGameBoard);
 
 			b->makeMove(randMove.at(0), randMove.at(1), randMove.at(2), randMove.at(3), whiteMove, newGameBoard, false);
+			int key = hash(newGameBoard);
+			//printf("%d\n", key);
+		
+			if (transpo.find(key) != transpo.end()) {
+				array<double, 2> info = transpo[key];
+				if (info.at(0) > depth) {
 
-			bestMove = max(bestMove, minimax(b, depth - 1, alpha, beta, newGameBoard, !whiteMove));
+				//	printf("WORKING!!! %d\n", info.at(1));
+					bestMove = info.at(1);
+				}
+				else {
+					bestMove = max(bestMove, minimax(b, depth - 1, alpha, beta, newGameBoard, !whiteMove));
+				}
+			}
+			else {
+				bestMove = max(bestMove, minimax(b, depth - 1, alpha, beta, newGameBoard, !whiteMove));
+			}
+
+			if (transpo.find(key) == transpo.end()) {
+
+				array<double, 2> info = { (double)depth, bestMove };
+
+				// printf("%lf %d\n", info.at(0), depth);
+				transpo[key] = info;
+			}
+			else {
+				array<double, 2> info = transpo.at(key);
+	//			if (depth == 2) printf("%lf %d\n", info.at(0), depth);
+
+				if (info[0] > depth) {
+					array<double, 2> info = { (double) depth, bestMove };
+					transpo[key] = info;
+				}
+			} 
+			//bestMove = max(bestMove, minimax(b, depth - 1, alpha, beta, newGameBoard, !whiteMove));
+
 			alpha = max(alpha, bestMove);
 			if (alpha >= beta) {
 				//	printf("CUT-OFF\n");
@@ -66,17 +143,25 @@ double AI::minimax(Board* b, int depth, double alpha, double beta, int gameBoard
 			int newGameBoard[8][8] = { {-1} };
 			
 
-			memcpy(&newGameBoard, gameBoard, sizeof(int) * BOARD_SIZE * BOARD_SIZE);
 
+			copyGamestate(gameBoard, newGameBoard);
 
 			b->makeMove(randMove.at(0), randMove.at(1), randMove.at(2), randMove.at(3), whiteMove, newGameBoard, false);
+			int key = hash(newGameBoard);
 			bestMove = min(bestMove, minimax(b, depth - 1, alpha, beta, newGameBoard, !whiteMove));
+	
+			
+			//bestMove = min(bestMove, minimax(b, depth - 1, alpha, beta, newGameBoard, !whiteMove));
+
 			beta = min(beta, bestMove);
 			if (alpha >= beta) {
 
 				//printf("CUT-OFF\n");
 				break;
 			}
+			array<double, 2> info = { (double)depth, bestMove };
+			transpo[key] = info;
+
 		}
 		return bestMove;
 	}
@@ -225,4 +310,37 @@ int AI::evaluateBoard(int gameBoard[8][8]) {
 		}
 	}*/
 	return overall;
+}
+
+void AI::initZobrist() {
+	srand(5);
+	for (int i = 0; i < BOARD_SIZE; i++) {
+		for (int j = 0; j < BOARD_SIZE; j++) {
+			for (int k = 0; k < ALL_PIECES; k++) {
+				zobristTable[i][j][k] = rand();
+			}
+		}
+	}
+}
+
+int AI::hash(int gameBoard[8][8]) {
+	int h = 0;
+	for (int i = 0; i < BOARD_SIZE; i++) {
+		for (int j = 0; j < BOARD_SIZE; j++) {
+			if (gameBoard[i][j] != -1) {
+				int pieceV = gameBoard[i][j];
+				h = (h ^ zobristTable[i][j][pieceV]);
+
+			}
+		}
+	}
+	return h;
+}
+
+void copyGamestate(int src[8][8], int dest[8][8]) {
+	for (int i = 0; i < BOARD_SIZE; i++) {
+		for (int j = 0; j < BOARD_SIZE; j++) {
+			dest[i][j] = src[i][j];
+		}
+	}
 }

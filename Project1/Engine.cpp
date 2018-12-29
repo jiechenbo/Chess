@@ -73,6 +73,7 @@ int main(int argc, char* args[])
 	bool firstTime = true;
 	bool whiteMove = true;
 	AI comp;
+	comp.initZobrist();
 	while (!quit) {
 		std::chrono::time_point<std::chrono::steady_clock> y = std::chrono::high_resolution_clock::now();
 		while (SDL_PollEvent(&e) != 0) {

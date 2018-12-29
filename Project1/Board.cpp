@@ -92,7 +92,7 @@ void initRow(int gameBoard[8][8], int startRow, int isBlack) {
 vector<array<int, 4>> Board::generateAllMovelists(bool whiteMove, int gameBoard[8][8]) {
 	int lowerLimit = whiteMove == true ? WHITE_KING : BLACK_KING;
 	int higherLimit = whiteMove == true ? WHITE_PAWN : BLACK_PAWN;
-	printf("CALLED HERE!!!!!!---------------------\n");
+	/*printf("CALLED HERE!!!!!!---------------------\n");
 	for (int i = 0; i < BOARD_SIZE; i++) {
 		for (int j = 0; j < BOARD_SIZE; j++) {
 			printf("%d ", gameBoard[i][j]);
@@ -101,7 +101,7 @@ vector<array<int, 4>> Board::generateAllMovelists(bool whiteMove, int gameBoard[
 	}
 
 
-
+	*/
 	vector<array<int, 4>> allMoves;
 	for (int i = 0; i < BOARD_SIZE; i++) {
 		for (int j = 0; j < BOARD_SIZE; j++) {
@@ -109,11 +109,11 @@ vector<array<int, 4>> Board::generateAllMovelists(bool whiteMove, int gameBoard[
 				int moveList[2][64] = { { -1 } };
 				getMoveList(whiteMove, j, i, moveList, gameBoard);
 				for (int k = 0; k < 64 && moveList[0][k] != -1; k++) {
-					if(gameBoard[i][j] == WHITE_KING) printf("THIS IS IMPORTANT %d %d %d %d %d\n", gameBoard[i][j], i, j, moveList[0][k], moveList[1][k]);
+	//				if(gameBoard[i][j] == WHITE_KING) printf("THIS IS IMPORTANT %d %d %d %d %d\n", gameBoard[i][j], i, j, moveList[0][k], moveList[1][k]);
 
 					bool f = validMove(j, i, moveList[1][k], moveList[0][k], whiteMove, false, gameBoard);
 					bool s = !checkKingMove(whiteMove, j, i, moveList[1][k], moveList[0][k], gameBoard);
-					if(gameBoard[i][j] == WHITE_KING) printf("Checking equality %d %d\n", f, s);
+		//			if(gameBoard[i][j] == WHITE_KING) printf("Checking equality %d %d\n", f, s);
 					if (f && s) {
 						array<int, 4> move = { j, i, moveList[1][k], moveList[0][k] };
 						allMoves.push_back(move);
