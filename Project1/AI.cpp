@@ -19,49 +19,19 @@ void AI::makeBestMove(Board* b, bool whiteMove) {
 		array<int, 4> randMove = allMoves.at(i);
 		int newGameBoard[8][8] = { {-1} };
 		
-		copyGamestate(gameBoard, newGameBoard);
+		for (int i = 0; i < BOARD_SIZE; i++) {
+			for (int j = 0; j < BOARD_SIZE; j++) {
+				newGameBoard[i][j] = gameBoard[i][j];
+			}
+		}
+
 		b->makeMove(randMove.at(0), randMove.at(1), randMove.at(2), randMove.at(3), whiteMove, newGameBoard, false);
 		double boardValue;
 		int key = hash(newGameBoard);
 		//printf("%d\n", key);
 		
-		if (transpo.find(key) != transpo.end()) {
-			array<double, 2> info = transpo[key];
-			if (info.at(0) > depth) {
+		boardValue = minimax(b, depth - 1, -DBL_MAX, DBL_MAX, newGameBoard, !whiteMove);
 
-				//printf("WORKING!!! %d\n", info.at(1));
-				bestMove = info.at(1);
-			}
-			else {
-				boardValue = minimax(b, depth - 1, -DBL_MAX, DBL_MAX, newGameBoard, !whiteMove);
-			}
-		}
-		else { 
-			boardValue = minimax(b, depth - 1, -DBL_MAX, DBL_MAX, newGameBoard, !whiteMove);
-		}
-
-		if (transpo.find(key) == transpo.end()) {
-
-			array<double, 2> info = { (double)depth, bestMove };
-
-			// printf("%lf %d\n", info.at(0), depth);
-			transpo[key] = info;
-		}
-		else {
-			array<double, 2> info = transpo.at(key);
-			//			if (depth == 2) printf("%lf %d\n", info.at(0), depth);
-
-			if (info[0] > depth) {
-				array<double, 2> info = { (double)depth, bestMove };
-				transpo[key] = info;
-			}
-		}
-		
-		if (transpo.find(key) == transpo.end()) {
-			array<double, 2> info = { (double) depth, boardValue };
-			transpo[key] = info;
-		}
-	
 		//	printf("%d %d %d %d %lf %lf\n", randMove.at(1), randMove.at(0), randMove.at(3), randMove.at(2), bestValue, boardValue);
 		if (boardValue > bestValue) {
 			
@@ -76,6 +46,18 @@ void AI::makeBestMove(Board* b, bool whiteMove) {
 }
 
 double AI::minimax(Board* b, int depth, double alpha, double beta, int gameBoard[8][8], int whiteMove) {
+	/*
+	int key = hash(gameBoard);
+	if (transpo.find(key) != transpo.end()) {
+		array<double, 3> info = transpo[key];
+
+		if (info.at(2) < 0 && info.at(1) >= beta) return info.at(1);
+		if (info.at(2) > 0 && info.at(1) <= alpha) return info.at(1);
+		if (info.at(2) == 0 && info.at(1) < beta && info.at(1) > alpha) return info.at(1);
+
+		if (info.at(2) < 0) alpha = max(alpha, info.at(1));
+		if (info.at(2) > 0) beta = min(beta, info.at(1));
+	} */
 	if (depth == 0) {
 		return (double)-evaluateBoard(gameBoard) - evaluateBoardPositions(gameBoard);
 	}
@@ -87,45 +69,17 @@ double AI::minimax(Board* b, int depth, double alpha, double beta, int gameBoard
 			array<int, 4> randMove = allMoves.at(i);
 			int newGameBoard[8][8] = { {-1} };
 
-
-			copyGamestate(gameBoard, newGameBoard);
+			for (int i = 0; i < BOARD_SIZE; i++) {
+				for (int j = 0; j < BOARD_SIZE; j++) {
+					newGameBoard[i][j] = gameBoard[i][j];
+				}
+			}
 
 			b->makeMove(randMove.at(0), randMove.at(1), randMove.at(2), randMove.at(3), whiteMove, newGameBoard, false);
-			int key = hash(newGameBoard);
+
 			//printf("%d\n", key);
-		
-			if (transpo.find(key) != transpo.end()) {
-				array<double, 2> info = transpo[key];
-				if (info.at(0) > depth) {
-
-				//	printf("WORKING!!! %d\n", info.at(1));
-					bestMove = info.at(1);
-				}
-				else {
-					bestMove = max(bestMove, minimax(b, depth - 1, alpha, beta, newGameBoard, !whiteMove));
-				}
-			}
-			else {
-				bestMove = max(bestMove, minimax(b, depth - 1, alpha, beta, newGameBoard, !whiteMove));
-			}
-
-			if (transpo.find(key) == transpo.end()) {
-
-				array<double, 2> info = { (double)depth, bestMove };
-
-				// printf("%lf %d\n", info.at(0), depth);
-				transpo[key] = info;
-			}
-			else {
-				array<double, 2> info = transpo.at(key);
-	//			if (depth == 2) printf("%lf %d\n", info.at(0), depth);
-
-				if (info[0] > depth) {
-					array<double, 2> info = { (double) depth, bestMove };
-					transpo[key] = info;
-				}
-			} 
-			//bestMove = max(bestMove, minimax(b, depth - 1, alpha, beta, newGameBoard, !whiteMove));
+	
+			bestMove = max(bestMove, minimax(b, depth - 1, alpha, beta, newGameBoard, !whiteMove));
 
 			alpha = max(alpha, bestMove);
 			if (alpha >= beta) {
@@ -133,6 +87,19 @@ double AI::minimax(Board* b, int depth, double alpha, double beta, int gameBoard
 				break;
 			}
 		}
+		/*
+		array<double, 3> info;
+		if (bestMove <= alpha) {
+			info = { (double) depth, bestMove, 1 };
+		}
+		else if (bestMove > alpha && bestMove < beta) {
+			info = { (double) depth, bestMove, 0 };
+		}
+		else if (bestMove >= beta) {
+			info = { (double) depth, bestMove, -1 };
+		}
+		int key = hash(gameBoard);
+		//transpo[key] = info; */
 		return bestMove;
 	}
 	else {
@@ -143,11 +110,14 @@ double AI::minimax(Board* b, int depth, double alpha, double beta, int gameBoard
 			int newGameBoard[8][8] = { {-1} };
 			
 
-
-			copyGamestate(gameBoard, newGameBoard);
+			for (int i = 0; i < BOARD_SIZE; i++) {
+				for (int j = 0; j < BOARD_SIZE; j++) {
+					newGameBoard[i][j] = gameBoard[i][j];
+				}
+			}
 
 			b->makeMove(randMove.at(0), randMove.at(1), randMove.at(2), randMove.at(3), whiteMove, newGameBoard, false);
-			int key = hash(newGameBoard);
+
 			bestMove = min(bestMove, minimax(b, depth - 1, alpha, beta, newGameBoard, !whiteMove));
 	
 			
@@ -159,10 +129,21 @@ double AI::minimax(Board* b, int depth, double alpha, double beta, int gameBoard
 				//printf("CUT-OFF\n");
 				break;
 			}
-			array<double, 2> info = { (double)depth, bestMove };
-			transpo[key] = info;
 
 		}
+		/*
+		array<double, 3> info;
+		if (bestMove <= alpha) {
+			info = { (double)depth, bestMove, 1 };
+		}
+		else if (bestMove > alpha && bestMove < beta) {
+			info = { (double)depth, bestMove, 0 };
+		}
+		else if (bestMove >= beta) {
+			info = { (double)depth, bestMove, -1 };
+		}
+		int key = hash(gameBoard);
+		transpo[key] = info; */
 		return bestMove;
 	}
 
