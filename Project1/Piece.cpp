@@ -82,8 +82,9 @@ bool Board::kingMoves(int spriteX, int spriteY, int newX, int newY, int gameBoar
 
 	}
 	else if (distanceX == 2 && distanceY == 0) {
-		printf("---------Checking castle availability------------------ %d\n", kingCheckMoves(whiteMove, gameBoard));
-		if (kingCheckMoves(whiteMove, gameBoard)) return false;
+		//printf("---------Checking castle availability------------------ %d\n", kingCheckMoves(whiteMove, gameBoard));
+		//Fix this situation
+		// if (kingCheckMoves(whiteMove, gameBoard)) return false;
 		//printf("1nd test!!!!\n");
 		if (initGameBoard[spriteY][spriteX] != gameBoard[spriteY][spriteX] || gameMoved[spriteY][spriteX] == true) {
 			return false;

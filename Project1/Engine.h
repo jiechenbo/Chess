@@ -117,7 +117,7 @@ public:
 
 	bool validMove(int spriteX, int spriteY, int newX, int newY, bool whiteMove, bool doMove, int gameBoard[8][8]);
 
-	void makeMove(int spriteX, int spriteY, int newX, int newY, bool whiteMove, int gameBoard[8][8], bool simulation);
+	void makeMove(int spriteX, int spriteY, int newX, int newY, bool whiteMove, int gameBoard[8][8], bool gameMoved[8][8]);
 
 	bool UserMove(int spriteX, int spriteY, int newX, int newY, bool whiteMove);
 
@@ -134,6 +134,9 @@ public:
 	bool checkKingMove(bool whiteMove, int posX, int posY, int newX, int newY, int gameBoard[8][8]);
 
 	int (*getGameBoard())[8];
+
+	bool (*getGameMoved())[8];
+	void copyGameMoved(bool src[8][8], bool dest[8][8]);
 
 	vector<array<int, 4>> Board::generateAllMovelists(bool whiteMove, int gameBoard[8][8]);
 private:

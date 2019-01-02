@@ -9,12 +9,12 @@ public:
 private:
 	double evaluateBoardPositions(int gameBoard[8][8]);
 	int evaluateBoard(int gameBoard[8][8]);
-	double minimax(Board* b, int depth, double alpha, double beta, int gameBoard[8][8], int whiteMove);
+	double AI::minimax(Board* b, int depth, double alpha, double beta, int gameBoard[8][8], bool gameMoved[8][8], int whiteMove);
 
-	unordered_map<int, array<double, 3>> transpo;
-	int zobristTable[8][8][12] = { { 0 } };
-
-	int hash(int gameBoard[8][8]);
+	unordered_map<unsigned long long, array<double, 3>> transpo;
+	unsigned long long zobristTable[8][8][12] = { { 0 } };
+	double killerMoves[2][30][3] = { {{-1}} };
+	unsigned long long hash(int gameBoard[8][8]);
 
 };
 

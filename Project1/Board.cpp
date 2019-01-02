@@ -18,7 +18,7 @@ void Board::render(SDL_Rect*clip)
 
 void Board::initBoard() {
 	initRow(gameBoard, 0, 1);
-	//gameBoard[0][0] = 6;
+	//gameBoard[7][7] = WHITE_KING;
 	initRow(gameBoard, BOARD_SIZE - 1, 0);
 
 	for (int i = 0; i < BOARD_SIZE; i++) {
@@ -92,8 +92,8 @@ void initRow(int gameBoard[8][8], int startRow, int isBlack) {
 vector<array<int, 4>> Board::generateAllMovelists(bool whiteMove, int gameBoard[8][8]) {
 	int lowerLimit = whiteMove == true ? WHITE_KING : BLACK_KING;
 	int higherLimit = whiteMove == true ? WHITE_PAWN : BLACK_PAWN;
-	/*printf("CALLED HERE!!!!!!---------------------\n");
-	for (int i = 0; i < BOARD_SIZE; i++) {
+	//printf("CALLED HERE!!!!!!---------------------\n");
+	/*for (int i = 0; i < BOARD_SIZE; i++) {
 		for (int j = 0; j < BOARD_SIZE; j++) {
 			printf("%d ", gameBoard[i][j]);
 		}
@@ -109,19 +109,24 @@ vector<array<int, 4>> Board::generateAllMovelists(bool whiteMove, int gameBoard[
 				int moveList[2][64] = { { -1 } };
 				getMoveList(whiteMove, j, i, moveList, gameBoard);
 				for (int k = 0; k < 64 && moveList[0][k] != -1; k++) {
-	//				if(gameBoard[i][j] == WHITE_KING) printf("THIS IS IMPORTANT %d %d %d %d %d\n", gameBoard[i][j], i, j, moveList[0][k], moveList[1][k]);
+					//if(gameBoard[i][j] == WHITE_KING || gameBoard[i][j] == BLACK_KING) printf("THIS IS IMPORTANT %d %d %d %d %d\n", gameBoard[i][j], i, j, moveList[0][k], moveList[1][k]);
 
 					bool f = validMove(j, i, moveList[1][k], moveList[0][k], whiteMove, false, gameBoard);
+					if (!f) continue;
 					bool s = !checkKingMove(whiteMove, j, i, moveList[1][k], moveList[0][k], gameBoard);
-		//			if(gameBoard[i][j] == WHITE_KING) printf("Checking equality %d %d\n", f, s);
-					if (f && s) {
-						array<int, 4> move = { j, i, moveList[1][k], moveList[0][k] };
-						allMoves.push_back(move);
+					if (!s) continue;
+					if ((gameBoard[i][j] == WHITE_KING || gameBoard[i][j] == BLACK_KING)) {
+						//printf("THIS IS IMPORTANT %d %d %d %d %d\n", gameBoard[i][j], i, j, moveList[0][k], moveList[1][k]);
+						//printf("Checking equality %d %d\n", f, s);
 					}
+					array<int, 4> move = { j, i, moveList[1][k], moveList[0][k] };
+					allMoves.push_back(move);
+				
 				}	
 			}
 		}
 	}
+	//printf("ENDED HERE\n");
 	return allMoves;
 }
 
@@ -139,7 +144,7 @@ bool Board::UserMove(int spriteX, int spriteY, int newX, int newY, bool whiteMov
 	printf("Valid move? %d %d\n", validMoveCheck == true, sizeof(gameBoard));
 	bool check = kingCheckMoves(whiteMove, newGameBoard);
 	if (validMoveCheck == true && !check) {
-		makeMove(spriteX, spriteY, newX	, newY, whiteMove, gameBoard, true);
+		makeMove(spriteX, spriteY, newX	, newY, whiteMove, gameBoard, gameMoved);
 		printf("hey activated");
 		for (int i = 0; i < BOARD_SIZE; i++) {
 			for (int j = 0; j < BOARD_SIZE; j++) {
@@ -153,20 +158,20 @@ bool Board::UserMove(int spriteX, int spriteY, int newX, int newY, bool whiteMov
 	return false;
 }
 
-void Board::makeMove(int spriteX, int spriteY, int newX, int newY, bool whiteMove, int gameBoard[8][8], bool simulation) {
+void Board::makeMove(int spriteX, int spriteY, int newX, int newY, bool whiteMove, int gameBoard[8][8], bool gameMoved[8][8]) {
 	int king = whiteMove == true ? WHITE_KING : BLACK_KING;
 
 	int distanceX = abs(newX - spriteX);
 	int distanceY = abs(newY - spriteY);
 
-	if (gameMoved[spriteY][spriteX] == false && initGameBoard[spriteY][spriteX] == gameBoard[spriteY][spriteX] && simulation == true) {
+	if (gameMoved[spriteY][spriteX] == false && initGameBoard[spriteY][spriteX] == gameBoard[spriteY][spriteX]) {
 		gameMoved[spriteY][spriteX] = true;
 	}
 
 	if (gameBoard[spriteY][spriteX] == king) {
 		if (distanceX == 2 && distanceY == 0) {
 			
-		printf("\nCASTLING....... %d %d %d %d\n", distanceX, distanceY, newX, spriteX);
+		//	printf("\nWTF CASTLING....... %d %d %d %d\n", distanceX, distanceY, newX, spriteX);
 
 			if (newX > spriteX) {
 				gameBoard[spriteY][newX - 1] = gameBoard[spriteY][7];
@@ -204,12 +209,12 @@ bool Board::checkStale(bool whiteMove, int gameBoard[8][8]) {
 
 					printf("THIS IS IMPORTANT %d %d %d %d %d\n", gameBoard[i][j], i, j, moveList[0][k], moveList[1][k]);					
 					bool f = validMove(j, i, moveList[1][k], moveList[0][k], whiteMove, false, gameBoard);
+					if (!f) continue;
 					bool s = !checkKingMove(whiteMove, j, i, moveList[1][k], moveList[0][k], gameBoard);
-					printf("CHECKING FUNCTIONN %d %d\n", f, s);
-					if (f && s) {
-						printf("CHESS PIECE %d %d %d %d!!!!!!!!!!!!!!!\n\n\n\n\n", i, j, moveList[0][k], moveList[1][k]);
-						return false;
-					}	
+					if (!s) continue;
+					printf("CHESS PIECE %d %d %d %d!!!!!!!!!!!!!!!\n\n\n\n\n", i, j, moveList[0][k], moveList[1][k]);
+					return false;
+				
 				}
 
 			}
@@ -220,12 +225,11 @@ bool Board::checkStale(bool whiteMove, int gameBoard[8][8]) {
 }
 
 bool Board::checkWin(bool whiteMove, int gameBoard[8][8]) {
-	printf("\n--------------CHECKING WIN--------------\n");
+	//printf("\n--------------CHECKING WIN--------------\n");
 	
 	int lowerLimit = whiteMove == true ? WHITE_KING : BLACK_KING;
 	int higherLimit = whiteMove == true ? WHITE_PAWN : BLACK_PAWN;
 
-	int king = whiteMove == true ? BLACK_KING : WHITE_KING ;
 	bool check = true;
 	for (int i = 0; i < BOARD_SIZE; i++) {
 		for (int j = 0; j < BOARD_SIZE; j++) {
@@ -234,15 +238,17 @@ bool Board::checkWin(bool whiteMove, int gameBoard[8][8]) {
 				getMoveList(whiteMove, j, i, moveList, gameBoard);
 				for (int k = 0; k < 64 && moveList[0][k] != -1; k++) {
 
-					printf("THIS IS IMPORTANT %d %d %d %d %d\n", gameBoard[i][j], j, i, moveList[0][k], moveList[1][k]);
+					if (!whiteMove) printf("THIS IS IMPORTANT %d %d %d %d %d\n", gameBoard[i][j], j, i, moveList[0][k], moveList[1][k]);
 					bool f = validMove(j, i, moveList[1][k], moveList[0][k], whiteMove, false, gameBoard);
+					if (!f) continue;
 					bool s = !checkKingMove(whiteMove, j, i, moveList[1][k], moveList[0][k], gameBoard);
-					printf("CHECKING FUNCTIONN %d %d\n", f, s);
-					if (f && s) {
-						check = false;
-						printf("CHESS PIECE %d %d %d %d!!!!!!!!!!!!!!!\n\n\n\n\n", j, i, moveList[0][k], moveList[1][k]);
-						break;
-					}
+					if (!s) continue;
+					if (!whiteMove) printf("CHECKING FUNCTIONN %d %d\n", f, s);
+
+					check = false;
+					if (!whiteMove) printf("CHESS PIECE %d %d %d %d!!!!!!!!!!!!!!!\n\n", j, i, moveList[0][k], moveList[1][k]);
+					break;
+					
 				}
 
 			}
@@ -253,8 +259,10 @@ bool Board::checkWin(bool whiteMove, int gameBoard[8][8]) {
 	}
 
 	if (check == true) {
-		printf("WE WIN!!!!!!!!!!!!!!!!!!!!!!!!!!");
-		exit(0);
+		
+		printf("WE WIN!!!!!!!!!!!!!!!!!!!!!!!!!! %d\n", whiteMove);
+
+		//exit(0);
 		return true;
 	}
 	return false;
@@ -262,13 +270,15 @@ bool Board::checkWin(bool whiteMove, int gameBoard[8][8]) {
 
 bool Board::checkKingMove(bool whiteMove, int posX, int posY, int newX, int newY, int gameBoard[8][8]) {
 	int newGameBoard[8][8] = { { -1 } };
+	bool newGameMoved[8][8];
+	copyGameMoved(gameMoved, newGameMoved);
 	for (int i = 0; i < BOARD_SIZE; i++) {
 		for (int j = 0; j < BOARD_SIZE; j++) {
 			newGameBoard[i][j] = gameBoard[i][j];
 		}
 	}
 	
-	makeMove(posX, posY, newX, newY, whiteMove, newGameBoard, false);
+	makeMove(posX, posY, newX, newY, whiteMove, newGameBoard, newGameMoved);
 	
 	//printf("checlkKingMove %d %d %d %d %d %d\n", newY, newX, posY, posX, newGameBoard[newY][newX], newGameBoard[posY][posX]);
 	return kingCheckMoves(whiteMove, newGameBoard);
@@ -292,14 +302,21 @@ bool Board::kingCheckMoves(bool whiteMove, int gameBoard[8][8]) {
 			}
 		}
 	}
-
+	if (kingPosX == -1 && kingPosY == -1) {
+		for (int i = 0; i < BOARD_SIZE; i++) {
+			for (int j = 0; j < BOARD_SIZE; j++) {
+				printf("%d ", gameBoard[i][j]);
+			}
+			printf("\n");
+		}
+	}
 	for (int i = 0; i < BOARD_SIZE; i++) {
 		for (int j = 0; j < BOARD_SIZE; j++) {
 			if (gameBoard[i][j] != -1 && (gameBoard[i][j] >= lowerLimit && gameBoard[i][j] <= higherLimit)) {
 				//printf("---------CHECKING VALID MOVES----- kings Pos X: %d kings Pos Y: %d chessPosX: %d chessPosY: %d %d\n", kingPosX, kingPosY, j, i, gameBoard[i][j]);
 				if (validMove(j, i, kingPosX, kingPosY, !whiteMove, false, gameBoard)) {
 					
-					//printf("--------------------IN-CHECK---------------------");
+					//printf("--------------------IN-CHECK---------------------\n");
 					return true;
 				}
 			}
@@ -320,6 +337,10 @@ void Board::printBoard() {
 
 int	(*Board::getGameBoard())[8] {
 	return gameBoard;
+}
+
+bool (*Board::getGameMoved())[8]{
+	return gameMoved;
 }
 
 void Board::getMoveList(bool whiteMove, int posX, int posY, int moveList[2][64], int gameBoard[8][8]) {
@@ -347,16 +368,17 @@ void Board::getMoveList(bool whiteMove, int posX, int posY, int moveList[2][64],
 					i++;
 				}
 			}
+			
 			if (posX - 2 >= 0) {
-				moveList[0][i] = posX - 2;
-				moveList[1][i] = posY;
+				moveList[0][i] = posY;
+				moveList[1][i] = posX - 2;
 				i++;
 			}
 			if (posX + 2 < BOARD_SIZE) {
-				moveList[0][i] = posX + 2;
-				moveList[1][i] = posY;
+				moveList[0][i] = posY;
+				moveList[1][i] = posX + 2;
 				i++;
-			}
+			}   
 			break;
 		}
 		case WHITE_QUEEN:
