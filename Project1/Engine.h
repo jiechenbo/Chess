@@ -139,10 +139,11 @@ public:
 	void copyGameMoved(bool src[8][8], bool dest[8][8]);
 
 	vector<array<int, 4>> Board::generateAllMovelists(bool whiteMove, int gameBoard[8][8]);
+
+	vector<array<int, 4>> Board::generateAllCapture(bool whiteMove, int gameBoard[8][8]);
 private:
 
 	bool kingMoves(int spriteX, int spriteY, int newX, int newY, int gameBoard[8][8], bool whiteMove);
-
 
 	int gameBoard[8][8];
 

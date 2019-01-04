@@ -16,7 +16,7 @@ void AI::makeBestMove(Board* b, bool whiteMove) {
 	
 	double bestValue = -DBL_MAX;
 	int bestMove = 0;
-	int depth = 4;
+	int depth = 3;
 	
 	for (int i = 0; i < allMoves.size(); i++) {
 		array<int, 4> randMove = allMoves.at(i);
@@ -32,9 +32,9 @@ void AI::makeBestMove(Board* b, bool whiteMove) {
 		b->makeMove(randMove.at(0), randMove.at(1), randMove.at(2), randMove.at(3), whiteMove, newGameBoard, newGameMoved);
 		double boardValue;
 		//printf("%d\n", key);
-		for (int iterative = 0; iterative < depth; iterative++) {
-			boardValue = minimax(b, iterative , -DBL_MAX, DBL_MAX, newGameBoard, newGameMoved, !whiteMove);
-		}
+		//for (int iterative = 0; iterative < depth; iterative++) {
+			boardValue = minimax(b, depth - 1 , -DBL_MAX, DBL_MAX, newGameBoard, newGameMoved, !whiteMove);
+		//}
 		//	printf("%d %d %d %d %lf %lf\n", randMove.at(1), randMove.at(0), randMove.at(3), randMove.at(2), bestValue, boardValue);
 		if (boardValue > bestValue) {
 			
@@ -64,17 +64,21 @@ double AI::minimax(Board* b, int depth, double alpha, double beta, int gameBoard
 		}
 	} 
 	if (depth == 0) {
-		return (double)-evaluateBoard(gameBoard) - evaluateBoardPositions(gameBoard);
+		int score = quiescenceSearch(b, gameBoard, gameMoved, whiteMove, alpha, beta, 4);
+		if (whiteMove) score = -score;
+		return score;
+		//return -quiescenceSearch(b, gameBoard, gameMoved, whiteMove, alpha, beta);
+		//return (double)-evaluateBoard(gameBoard) - evaluateBoardPositions(gameBoard);
 	}
 	vector<array<int, 4>> allMoves = b->generateAllMovelists(whiteMove, gameBoard);
 	if (allMoves.size() == 0) {
 		
 		if  (allMoves.size() == 0 && b->kingCheckMoves(whiteMove, gameBoard)) {
 
-		if (whiteMove) return 99999 + depth;
-		return -99999 - depth;
+			if (whiteMove) return 99999 + depth;
+			return -99999 - depth;
 
-		}
+		}	
 		
 	}
 	double bestMove;
@@ -82,34 +86,37 @@ double AI::minimax(Board* b, int depth, double alpha, double beta, int gameBoard
 	
 	if (!whiteMove) {
 		bestMove = -DBL_MAX;
-		for (int i = 0; i < allMoves.size(); i++) {
+		if (allMoves.size() > 2) {
+			for (int i = 0; i < allMoves.size(); i++) {
 
-			array<int, 4> randMove = allMoves.at(i);
-			for (int j = 0; j < 2; j++) {
-				if (killerMoves[j][depth][0] == randMove.at(0) && killerMoves[j][depth][1] == randMove.at(1)
-					&& killerMoves[j][depth][2] == randMove.at(2) && killerMoves[j][depth][3] == randMove.at(3)) {
-					array<int, 4> test = allMoves.at(j);
-				//	printf("before %d %d %d %d | %d %d\n", test[0], test[1], test[2], test[3], i, j);
-					allMoves[i][0] = allMoves[j][0];
-					allMoves[i][1] = allMoves[j][1];
-					allMoves[i][2] = allMoves[j][2];
-					allMoves[i][3] = allMoves[j][3];
+				array<int, 4> randMove = allMoves.at(i);
 
-					array<int, 4> move = { killerMoves[j][depth][0], killerMoves[j][depth][1], killerMoves[j][depth][2], killerMoves[j][depth][3] };
-					allMoves[j] = move;
-					allMoves[j][0] = move[0];
-					allMoves[j][1] = move[1];
-					allMoves[j][2] = move[2];
-					allMoves[j][3] = move[3];
-					test = allMoves.at(j);
+				for (int j = 0; j < 2; j++) {
+					if (killerMoves[j][depth][0] == randMove.at(0) && killerMoves[j][depth][1] == randMove.at(1)
+						&& killerMoves[j][depth][2] == randMove.at(2) && killerMoves[j][depth][3] == randMove.at(3)) {
+						//array<int, 4> test = allMoves.at(j);
+					//	printf("before %d %d %d %d | %d %d\n", test[0], test[1], test[2], test[3], i, j);
+						allMoves[i][0] = allMoves[j][0];
+						allMoves[i][1] = allMoves[j][1];
+						allMoves[i][2] = allMoves[j][2];
+						allMoves[i][3] = allMoves[j][3];
 
-				//	printf("after %d %d %d %d\n", test[0], test[1], test[2], test[3]);
+						array<int, 4> move = { killerMoves[j][depth][0], killerMoves[j][depth][1], killerMoves[j][depth][2], killerMoves[j][depth][3] };
+						allMoves[j] = move;
+						allMoves[j][0] = move[0];
+						allMoves[j][1] = move[1];
+						allMoves[j][2] = move[2];
+						allMoves[j][3] = move[3];
+						//test = allMoves.at(j);
+
+					//	printf("after %d %d %d %d\n", test[0], test[1], test[2], test[3]);
+					}
 				}
+
+
 			}
-
 		}
-
-		for (int i = 0; i < allMoves.size(); i++) {
+		for(int i = 0; i < allMoves.size(); i++) {
 
 			array<int, 4> randMove = allMoves.at(i);
 			int newGameBoard[8][8] = { {-1} };
@@ -146,34 +153,36 @@ double AI::minimax(Board* b, int depth, double alpha, double beta, int gameBoard
 	}
 	else {
 		bestMove = DBL_MAX;
+		
 
-		for (int i = 0; i < allMoves.size(); i++) {
+		if (allMoves.size() > 2) {
+			for (int i = 0; i < allMoves.size(); i++) {
 
-			array<int, 4> randMove = allMoves.at(i);
-			for (int j = 0; j < 2; j++) {
-				if (killerMoves[j][depth][0] == randMove.at(0) && killerMoves[j][depth][1] == randMove.at(1)
-					&& killerMoves[j][depth][2] == randMove.at(2) && killerMoves[j][depth][3] == randMove.at(3)) {
-					array<int, 4> test = allMoves.at(j);
-			//		printf("before %d %d %d %d | %d %d\n", test[0], test[1], test[2], test[3], i, j);
-					allMoves[i][0] = allMoves[j][0];
-					allMoves[i][1] = allMoves[j][1];
-					allMoves[i][2] = allMoves[j][2];
-					allMoves[i][3] = allMoves[j][3];
+				array<int, 4> randMove = allMoves.at(i);
+				for (int j = 0; j < 2; j++) {
+					if (killerMoves[j][depth][0] == randMove.at(0) && killerMoves[j][depth][1] == randMove.at(1)
+						&& killerMoves[j][depth][2] == randMove.at(2) && killerMoves[j][depth][3] == randMove.at(3)) {
+						array<int, 4> test = allMoves.at(j);
+						//		printf("before %d %d %d %d | %d %d\n", test[0], test[1], test[2], test[3], i, j);
+						allMoves[i][0] = allMoves[j][0];
+						allMoves[i][1] = allMoves[j][1];
+						allMoves[i][2] = allMoves[j][2];
+						allMoves[i][3] = allMoves[j][3];
 
-					array<int, 4> move = { killerMoves[j][depth][0], killerMoves[j][depth][1], killerMoves[j][depth][2], killerMoves[j][depth][3] };
-					allMoves[j] = move;
-					allMoves[j][0] = move[0];
-					allMoves[j][1] = move[1];
-					allMoves[j][2] = move[2];
-					allMoves[j][3] = move[3];
-					test = allMoves.at(j);
+						array<int, 4> move = { killerMoves[j][depth][0], killerMoves[j][depth][1], killerMoves[j][depth][2], killerMoves[j][depth][3] };
+						allMoves[j] = move;
+						allMoves[j][0] = move[0];
+						allMoves[j][1] = move[1];
+						allMoves[j][2] = move[2];
+						allMoves[j][3] = move[3];
+						test = allMoves.at(j);
 
-				//	printf("after %d %d %d %d\n", test[0], test[1], test[2], test[3]);
+						//	printf("after %d %d %d %d\n", test[0], test[1], test[2], test[3]);
+					}
 				}
+
 			}
-
 		}
-
 
 		for (int i = 0; i < allMoves.size(); i++) {
 
@@ -399,6 +408,62 @@ void AI::initZobrist() {
 		}
 	}
 }
+
+
+
+double AI::quiescenceSearch(Board* b, int gameBoard[8][8], bool gameMoved[8][8], bool whiteMove, double alpha, double beta, int depth) {	
+	double boardV;
+
+	if (whiteMove) boardV = (double)evaluateBoard(gameBoard) + evaluateBoardPositions(gameBoard);
+	if (!whiteMove) boardV = (double)-evaluateBoard(gameBoard) - evaluateBoardPositions(gameBoard);
+	if (depth == 0) return boardV;
+	if (boardV >= beta) {
+
+		return boardV;
+	}
+
+	if (boardV > alpha) {
+		alpha = boardV;
+	}
+
+	vector<array<int, 4>> allMoves = b->generateAllCapture(whiteMove, gameBoard);
+	if (allMoves.size() == 0) {
+
+		if (whiteMove) boardV = (double)evaluateBoard(gameBoard) + evaluateBoardPositions(gameBoard);
+		if (!whiteMove) boardV = (double)-evaluateBoard(gameBoard) - evaluateBoardPositions(gameBoard);
+
+		return boardV;
+	}
+	for (int i = 0; i < allMoves.size(); i++) {
+
+	
+		array<int, 4> randMove = allMoves.at(i);
+
+		int newGameBoard[8][8] = { { -1 } };
+		bool newGameMoved[8][8];
+
+		b->copyGameMoved(gameMoved, newGameMoved);
+
+		for (int i = 0; i < BOARD_SIZE; i++) {
+			for (int j = 0; j < BOARD_SIZE; j++) {
+
+				newGameBoard[i][j] = gameBoard[i][j];
+			}
+		}
+		b->makeMove(randMove.at(0), randMove.at(1), randMove.at(2), randMove.at(3), whiteMove, newGameBoard, newGameMoved);
+
+
+	//	if (b->kingCheckMoves(!whiteMove, newGameBoard)) continue;
+		double score = -quiescenceSearch(b, newGameBoard, newGameMoved, !whiteMove, -beta, -alpha, depth - 1);
+
+		if (score >= beta) return score;
+		if (score > alpha) {
+			alpha = score;
+		}
+	}
+	//printf("%lf\n", alpha);
+	return alpha;
+} 
 
 unsigned long long AI::hash(int gameBoard[8][8]) {
 	unsigned long long h = 0;

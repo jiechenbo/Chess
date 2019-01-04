@@ -16,5 +16,7 @@ private:
 	double killerMoves[2][30][3] = { {{-1}} };
 	unsigned long long hash(int gameBoard[8][8]);
 
+
+	double quiescenceSearch(Board* b, int gameBoard[8][8], bool gameMoved[8][8], bool whiteMove, double alpha, double beta, int depth);
 };
 

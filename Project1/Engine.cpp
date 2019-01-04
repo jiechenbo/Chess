@@ -44,8 +44,10 @@ LButton gButtons[TOTAL_BUTTONS];
 
 int main(int argc, char* args[])
 {
+	
 	if (!init()) {
 		printf( "Failed to initialize!\n" );
+		
 		return -1;
 	}
 
@@ -97,8 +99,14 @@ int main(int argc, char* args[])
 
 				printf("Mousing down");
 			if (isInBoundingRegion(e.button.x, e.button.y)) {
-					
+					int lowerLimit = whiteMove == true ? WHITE_KING : BLACK_KING;
+					int higherLimit = whiteMove == true ? WHITE_PAWN : BLACK_PAWN;
 					if (spriteValue == -1 && b.getSprite(e.button.x, e.button.y) != -1) {
+						spriteValue = b.getSprite(e.button.x, e.button.y);
+
+						oldX = e.button.x;
+						oldY = e.button.y;
+					} else if (spriteValue != -1 && b.getSprite(e.button.x, e.button.y) >= lowerLimit && b.getSprite(e.button.x, e.button.y) <= higherLimit) {
 						spriteValue = b.getSprite(e.button.x, e.button.y);
 
 						oldX = e.button.x;
@@ -119,13 +127,12 @@ int main(int argc, char* args[])
 								//exit(0);
 							}
 
-							spriteValue = -1;
-							oldX = 0;
-							oldY = 0;
 							firstTime = false;
 							whiteMove = whiteMove == true ? false : true;
-						
 						}
+						spriteValue = -1;
+						oldX = 0;
+						oldY = 0;
 					} else {
 						spriteValue = -1;
 						oldX = 0;
