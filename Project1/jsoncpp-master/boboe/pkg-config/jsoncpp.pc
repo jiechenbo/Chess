@@ -1,9 +1,0 @@
-libdir=C:/Program Files (x86)/jsoncpp/lib
-includedir=C:/Program Files (x86)/jsoncpp/include
-
-Name: jsoncpp
-Description: A C++ library for interacting with JSON
-Version: 1.8.3
-URL: https://github.com/open-source-parsers/jsoncpp
-Libs: -L${libdir} -ljsoncpp
-Cflags: -I${includedir}

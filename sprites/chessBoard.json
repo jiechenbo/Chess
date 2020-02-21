@@ -1,0 +1,6 @@
+{
+
+	"sprites": "sprites/chessSprites.bmp",
+	"background": "sprites/chessBoard.bmp"
+
+}
