@@ -13,8 +13,6 @@ SDL_Renderer* gRenderer = NULL;
 LTexture gTexture;
 LTexture gBackground;
 
-const int WALKING_ANIMATION_FRAMES = 4;
-
 SDL_Rect gSpriteClips[SPRITES_TOTAL];
 SDL_Rect wall;
 
@@ -23,10 +21,7 @@ LTexture gButtonSpriteSheetTexture;
 
 Board b;
 
-const int BUTTON_WIDTH = 300;
-const int BUTTON_HEIGHT = 200;
 const int BOARD_SIZE = 8;
-const int TOTAL_BUTTONS = 4;
 
 int main(int argc, char* args[])
 {

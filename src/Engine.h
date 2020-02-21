@@ -177,7 +177,4 @@ extern LTexture gSpriteSheetTexture;
 extern LTexture gButtonSpriteSheetTexture;
 
 
-extern LButton gButtons[4];
-
-
 
