@@ -1,0 +1,10 @@
+pull_request_rules:
+  - name: automatic merge for main when reviewed and CI passes
+    conditions:
+      - check-success=Travis CI - Pull Request
+      - "#approved-reviews-by>=2"
+      - base=main
+      - label=ready-to-merge
+    actions:
+      merge:
+        method: merge
